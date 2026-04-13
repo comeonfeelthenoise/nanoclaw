@@ -10,6 +10,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     || echo "apt-get failed (offline env) — continuing without system packages"
 
+# Copy host CA bundle so npm can verify the egress proxy's certificate
+COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
 # Install claude-code globally
 RUN npm install -g @anthropic-ai/claude-code
 
