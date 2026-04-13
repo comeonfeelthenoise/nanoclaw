@@ -103,7 +103,8 @@ export async function run(args: string[]): Promise<void> {
   let buildOk = false;
   logger.info({ runtime }, 'Building container');
   try {
-    execSync(`${buildCmd} -t ${image} .`, {
+    const networkFlag = runtime === 'docker' ? '--network host ' : '';
+    execSync(`${buildCmd} ${networkFlag}-t ${image} .`, {
       cwd: path.join(projectRoot, 'container'),
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -118,8 +119,9 @@ export async function run(args: string[]): Promise<void> {
   if (buildOk) {
     logger.info('Testing container');
     try {
+      const networkRunFlag = runtime === 'docker' ? '--network none ' : '';
       const output = execSync(
-        `echo '{}' | ${runCmd} run -i --rm --entrypoint /bin/echo ${image} "Container OK"`,
+        `echo '{}' | ${runCmd} run -i --rm ${networkRunFlag}--entrypoint /bin/echo ${image} "Container OK"`,
         { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] },
       );
       testOk = output.includes('Container OK');

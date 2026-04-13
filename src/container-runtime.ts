@@ -12,9 +12,11 @@ export const CONTAINER_RUNTIME_BIN = 'docker';
 
 /** CLI args needed for the container to resolve the host gateway. */
 export function hostGatewayArgs(): string[] {
-  // On Linux, host.docker.internal isn't built-in — add it explicitly
+  // On Linux, use host networking so containers can reach the OneCLI
+  // credential proxy and Anthropic API via the host's egress proxy.
+  // --add-host is redundant with host network but kept for compatibility.
   if (os.platform() === 'linux') {
-    return ['--add-host=host.docker.internal:host-gateway'];
+    return ['--network', 'host', '--add-host=host.docker.internal:host-gateway'];
   }
   return [];
 }
