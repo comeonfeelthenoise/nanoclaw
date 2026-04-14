@@ -6,6 +6,7 @@ import { ChildProcess, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
+import { readEnvFile } from './env.js';
 import {
   CONTAINER_IMAGE,
   CONTAINER_MAX_OUTPUT_SIZE,
@@ -265,6 +266,12 @@ function buildContainerArgs(
     args.push('-e', 'ANTHROPIC_API_KEY=placeholder');
   } else {
     args.push('-e', 'CLAUDE_CODE_OAUTH_TOKEN=placeholder');
+  }
+
+  // Inject Gemini API key if configured — passed directly since it's a separate API
+  const geminiKey = readEnvFile(['GEMINI_API_KEY']).GEMINI_API_KEY;
+  if (geminiKey) {
+    args.push('-e', `GEMINI_API_KEY=${geminiKey}`);
   }
 
   // Runtime-specific args for host gateway resolution
